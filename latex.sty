@@ -1,0 +1,11 @@
+\usepackage{comment}
+\usepackage{mdframed}
+% \usepackage{xcolor}
+\let\oldquote=\quote
+\let\endoldquote=\endquote
+\definecolor{shadecolor}{gray}{0.95}
+% \colorlet{shadecolor}{gray!40}
+% \renewenvironment{quote}{\begin{shaded*}\begin{oldquote}}{\end{oldquote}\end{shaded*}}
+\renewenvironment{quote}
+{\begin{mdframed}[topline=false,rightline=false,bottomline=false,linewidth=6,skipabove=\baselineskip,innerleftmargin=-15]\begin{oldquote}}
+{\end{oldquote}\end{mdframed}}
