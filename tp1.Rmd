@@ -187,6 +187,8 @@ Le code du plus simple graphique `ggplot2` possède trois parties:
 
 **Exercice 1.1.1** Représentez sous forme d'un nuage de points la superficie (`superficie`, en abscisse) et la population (`population`en ordonnée) des régions NUTS 2 en 2015. Notez le nom de la fonction `geom_...` que vous avez utilisé.
 
+- *Avec* R Studio*, utilisez l'autocomplétion (touche* `tab`*). Souvenez-vous en effet que toutes les fonctions graphiques commencent par* `geom`.
+
 \dotfill
 
 ````{r, eval = FALSE}
@@ -195,8 +197,6 @@ NUTS2_year %>%
   ggplot(aes(x=....................., y=............................)) +
   geom_..........................()
 ```
-
-*Avec* R Studio*, utilisez l'autocomplétion (touche* `tab`*). Souvenez-vous en effet que toutes les fonctions graphiques commencent par* `geom`.
 
 `r if(rmarkdown::metadata$version!='professeur') "<!--"`  
 > **Suggestion de code:**
@@ -320,9 +320,9 @@ NUTS2_year %>%
 > **Éléments de correction:**  Il manque la source des données — par exemple avec `labs(caption=...)` — et surtout une façon d'associer les lignes à chacune des deux régions — par exemple avec `geom_text`. (Ceci dit, il n'est pas toujours nécessaire d'identifier une observation en particulier. Ici, par contre, c'est bienvenu!)
 `r if(rmarkdown::metadata$version!='professeur') "-->"`
 
-**Exercice 1.6** Reprenez votre graphique population—superficie et habillez-le pour le rendre publiable.
+**Exercice 1.2.4** Reprenez votre graphique population—superficie et habillez-le pour le rendre publiable.
 
-_N'oubliez pas de donner un titre et sous-titre à votre graphique. Je recommande de donner pour titre une phrase-choc (ex: "La Normandie, destination rêvée des français.") et pour sous-titre un descriptif plus neutre (ex: "Nombre de nuités par région en 2015")._
+- _N'oubliez pas de donner un titre et sous-titre à votre graphique. Je recommande de donner pour titre une phrase-choc (ex: "La Normandie, destination rêvée des français.") et pour sous-titre un descriptif plus neutre (ex: "Nombre de nuités par région en 2015")._
 
 `r if(rmarkdown::metadata$version!='professeur') "<!--"`  
 > **Éléments de correction:**
@@ -2070,11 +2070,12 @@ a. L'auteur a un message fort et précis (la diminution du volume de glace).
 - _The Grammar of Graphics_, de Leland Wilkinson (2005)
     L'ouvrage qui a inspiré la bibliothèque `ggplot2`.
 
-### Blogs et Twitter
+### Blogs, sites et Twitter
 
 - [The Pudding](https://pudding.cool/)
 - [Junk Charts](https://junkcharts.typepad.com), de Kaiser Fung (@junkcharts)
 - Edward Tufte (@EdwardTufte)
+- [Our world in data](https://ourworldindata.org), de 
 
 ### Technique
 
