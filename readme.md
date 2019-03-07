@@ -40,8 +40,8 @@ Ce cours peu néanmoins être adapté pour d'autres publics.
 
 ## Pistes d'évolution
 
-- Panorama de la visualisation (cours magistral)
-- Cartographie et données spatiales (cours magistral / TP)
-- Histoire de la visualisation de données (cours magistral)
-- Graphiques animés avec `gganimate` (TP)
-- Graphiques interactifs avec R (TP)
+- [ ] Panorama de la visualisation (cours magistral)
+- [ ] Cartographie et données spatiales (cours magistral / TP)
+- [ ] Histoire de la visualisation de données (cours magistral)
+- [ ] Graphiques animés avec `gganimate` (TP)
+- [ ] Graphiques interactifs avec R (TP)
