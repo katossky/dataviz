@@ -1,0 +1,41 @@
+---
+title: "Dm dataviz"
+author: "Pelé Marius Lercari Lola"
+date: "26 février 2019"
+output: word_document
+---
+**Initialisation**
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(questionr)
+```
+
+**Import des données**
+
+Nous n'avons pas pu retrouver le jeu de données initial car la source n'était pas suffisamment précise, nous avons donc récupéré les données lisibles sur le graphe.
+
+```{r}
+unemployement<-c(7,9,13.5,15)
+temps<-c(0,9,15,30)
+temps_name<-c("Dec'07","Sept'08","March'09","June'10")
+
+data<-data.frame(temps_name,temps,unemployement)
+```
+
+**Graphe**
+
+```{r}
+data %>% 
+  ggplot(aes(x=temps,y=unemployement))+
+  geom_col()+ # Nous avons choisi de représenter les données par un diagramme en barres
+  scale_x_continuous(name=NULL,labels=temps_name,breaks = temps)+ # On modifie les labels de l'axe des abscisses afin d'afficher les dates
+  scale_y_continuous(name="Total unemployement (millions)",labels=NULL)+ # Comme les valeurs sont affichées sur l'histogramme, on choisit supprimmer les unités sur l'axe des ordonnées. On précise néanmoins à quoi il correspond.
+  geom_text(aes(label=c("7 MIL","9 MIL", "13.5 MIL","15 MIL")),nudge_y=0.5)+ # On affiche les données au dessus des barres
+  theme_minimal()+
+  labs(title="The increasing of total Unemployement in the US",caption="Source : Bureau of Labor Statistics") #On rajoute le titre et la source
+```
+
+**Choix du graphe**
+
+Comme mentionné précédemment, nous n'avons pas pu retrouver les données utilisées pour tracer le graphe. Néanmoins, plutôt que reproduire ce dernier en corrigeant les échelles, nous avons choisi de construire un diagramme en barres. En effet, relier les 4 points ne permettait pas de tenir compte des possibles fluctuations de la courbe de chômage sur la période. De plus, cette représentation permet de conserver l'idée principale du graphique original, à savoir illustrer la hausse générale du chômage depuis décembre 2009. Nous avons déduit de notre analyse et de nos recherches que l'information affichée sur le graphique correspond bien aux chiffres du chômage total aux Etats-Unis.

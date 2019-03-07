@@ -1,0 +1,158 @@
+---
+title: "DM Visualisation de données avec R - Groupe 30"
+author: "Wafa Gabouj & Paul Gehin"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Graphique 13
+
+## Importation des données
+
+Les données proviennent de la même source que le graphique fourni (BLS).
+Nous avons utilisé les données du "Current Population Survey" (https://www.bls.gov/web/empsit/cpsee_e07.htm).
+Ne pouvant pas choisir les dates des données, nous avons utilisé les archives du web afin d'obtenir des données anciennes.
+Cependant, nous n'avons pas pu obtenir les données sur trois trimestres.
+Nous avons alors décidé d'utiliser les données du graphique pour un trimestre et de laisser les deux autres en données manquantes.
+
+```{r}
+data <- data.frame(quarter = c("2007 4th",
+                            "2008 1st",
+                            "2008 2nd",
+                            "2008 3rd",
+                            "2008 4th",
+                            "2009 1st",
+                            "2009 2nd",
+                            "2009 3rd",
+                            "2009 4th",
+                            "2010 1st",
+                            "2010 2nd"),
+                   unemployed = c(7,
+                               NA,
+                               NA,
+                               9.333,
+                               10.691,
+                               12.666,
+                               14.341,
+                               14.922,
+                               15.349,
+                               14.882,
+                               14.871))
+
+```
+
+
+##Importation packages
+```{r eval=FALSE}
+install.packages("ggthemes")
+```
+
+```{r message=FALSE, warning=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(ggthemes)
+```
+## Graphiques
+
+### Graphique job loss
+
+```{r message=FALSE, warning=FALSE}
+data.frame(quarter = c("2007 4th",
+                            "2008 1st",
+                            "2008 2nd",
+                            "2008 3rd",
+                            "2008 4th",
+                            "2009 1st",
+                            "2009 2nd",
+                            "2009 3rd",
+                            "2009 4th",
+                            "2010 1st",
+                            "2010 2nd"),
+                   jobloss = c(NA,
+                               NA,
+                               NA,
+                               NA,
+                               10691-9333,
+                               12666-10691,
+                               14341-12666,
+                               14922-14341,
+                               15349-14922,
+                               14882-15349,
+                               14871-14882)) %>%
+  ggplot(aes(x=quarter,y=jobloss)) +
+  theme_hc() +
+  geom_col(width=0.5,
+           fill="steelblue",
+           na.rm=TRUE) +
+  scale_x_discrete(labels=c("Dec. 2007",
+                            "",
+                            "",
+                            "Sept. 2008",
+                            "",
+                            "March 2009",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "June 2010")) +
+  scale_y_continuous(limits = c(-500,2100)) +
+  theme(text = element_text(size=10),
+        axis.text.x = element_text(angle=45, hjust=1)) +
+  geom_text(aes(label=round(jobloss,2)),
+            size = 4,
+            position=position_dodge(width=0.9),
+            vjust=-0.5,
+            colour = "red",
+            fontface = "bold",
+            na.rm=TRUE) +
+  labs(x = NULL,
+       y = "Persons who loses their jobs (in thousands)",
+       title = "United States' jobs on the loose after the subprime mortgage crisis",
+       subtitle = "Job loss, seasonally adjusted",
+       caption = "Source: BLS (https://www.bls.gov/web/empsit/cpsee_e07.htm)")
+```
+
+Ce graphique possède moins d'informations (à cause des données manquantes) que le graphique que l'on a retenu et est bien moins lisible.
+
+Cependant, il permet de se rendre compte facilement de la forte hausse de chômeurs en 2008/2009.
+
+### Graphique final
+
+```{r message=FALSE, warning=FALSE}
+data %>%
+  ggplot(aes(x=quarter,y=unemployed)) +
+  theme_hc() +
+  geom_col(width=0.5,
+           fill="steelblue",
+           na.rm=TRUE) +
+  scale_x_discrete(labels=c("Dec. 2007",
+                            "",
+                            "",
+                            "Sept. 2008",
+                            "",
+                            "March 2009",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "June 2010")) +
+  scale_y_continuous() +
+  theme(text = element_text(size=14),
+        axis.text.x = element_text(angle=45, hjust=1)) +
+  geom_text(aes(label=str_c(round(unemployed,1)," M")),
+            size = 4,
+            nudge_y = 0.8,
+            colour = "red",
+            fontface = "bold",
+            na.rm=TRUE) +
+  labs(x = NULL,
+       y = "Total unemployed persons (in millions)",
+       title = "United States' jobs on the loose after the subprime mortgage crisis",
+       subtitle = "Quarterly averages of unemployed persons, seasonally adjusted",
+       caption = "Source: BLS (https://www.bls.gov/web/empsit/cpsee_e07.htm)")
+```

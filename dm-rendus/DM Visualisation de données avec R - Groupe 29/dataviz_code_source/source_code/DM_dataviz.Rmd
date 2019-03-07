@@ -1,0 +1,116 @@
+---
+title: 'DM : Data Visualization - Grp 29'
+author: "Habib C, Mathilde E"
+date: "24 février 2019"
+output:
+  word_document: 
+    keep_md: yes
+  pdf_document: default
+  html_document: default
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+rm(list = ls())
+```
+
+
+```{r,include=FALSE}
+
+#data.table : fread
+if(!require(data.table)) install.packages("data.table")
+require(data.table)
+
+#ggplot2
+if(!require(ggplot2)) install.packages("ggplot2")
+require(ggplot2)
+
+#tidyverse
+if(!require(tidyverse)) install.packages("tidyverse")
+require(tidyverse)
+
+#ggthemes
+if(!require(ggthemes)) install.packages("ggthemes")
+require(ggthemes)
+
+#ggrepel
+if(!require(ggrepel)) install.packages("ggrepel")
+require("ggrepel")
+
+```
+
+
+# I - Import  et Préparation des données
+
+
+## 1-1 Import et sélection de la période d'intérêt
+```{r}
+#import
+dataset <- fread("../data/dataset.csv")
+
+#sélection de la période d'étude : 1990 -> 2012
+dataset <- dataset[Year %in% 1990:2012]
+head(dataset)
+```
+Source: Florida Departement of Law Enforcement (2008).Crime in Florida, 1971-2007 Florida uniform report [Computer program],Tallahassee, FL :FDLE. [dataset](https://docs.google.com/spreadsheets/d/1-kFDDxN7_APdaUwZpUdqN4O6Oh1vKVJreGqopyXyboI/edit#gid=695259917)
+
+
+
+## 2-2 Gestion des données manquantes
+
+
+Vu que notre table présente des données manquantes, nous avons fait le choix de les estimer en s'aidant de *plot digitizer*.
+
+```{r}
+Years <- 2008:2012
+Values <- c(775,700,680,699,721) #données observées graphiquement
+
+cmp <- 1
+while(cmp<=length(Years)){
+  dataset[Year== Years[cmp], `Murder by firearm`:= Values[cmp]]
+  cmp= cmp +1
+}
+
+rm(cmp,Values,Years)
+```
+
+
+
+
+#II - Graphique
+
+```{r}
+#label to show : chiffres clés qu'on souhaite afficher pour montrer l'évolution du nombre de meurtre
+label_to_show <- c(873,rep("",14),521,740,rep("",5),721) 
+```
+
+
+```{r}
+ggplot(dataset, aes(x=Year , y=`Murder by firearm`)) + 
+
+#Titre, sous-titre, noms des axes
+labs(title="A law that encourages murders ? ",
+     subtitle = "Number of murders commited using firearms in Florida since 1990",
+     caption= "Source: Florida Departement of Law Enforcement (2008).Crime in Florida, 1971-2007.\n*missing values have been estimated (2008 to 2012) \n\nMathide E, Habib C - 27/02/19",
+     x=element_blank(), #ne pas afficher Year sur l'axe des abscisses
+     y=element_blank())+ #ne pas afficher le label de y
+
+#tracer les lignes
+geom_line(color = "#cb181d")+
+
+#placer les points en plus des lignes
+geom_point(color = "#cb181d")+
+
+#afficher les nombres d'intérêts pour des années choisies au préalabe 
+geom_text_repel(label=label_to_show,nudge_x = 0.3 ,col="black",size=3.5)+
+  
+#Avoir le label précisant quand a été instauter la loi   
+geom_label_repel(label=c(rep("",15),"2005 : ''Stand your ground'' law enactment",rep("",7)),nudge_y = -65, arrow = grid::arrow(length = unit(0.1, "inches")),box.padding = 0.01)+
+  
+#changer le theme d'affichage de ggplot : choix du theme stata
+theme_stata(scheme = "s1color")
+```
+
+
+

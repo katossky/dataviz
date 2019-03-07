@@ -1,0 +1,185 @@
+---
+title: "Dataviz"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library('ggplot2')
+library('tidyverse')
+library('ggthemes') 
+
+data <- data.frame('année' = 1999:2016, 'annual_deaths_from_fireams' = c(1721,1692,1816,1886,1940,1890,1838,2083,2272,2334,2324,2268,2378,2473,2442,2410,2559,2704 ))
+data2 <-data.frame('année' = 1990:2012, 'annual_deaths_from_fireams' = c(873,802,795,801,756,707,692,635,591,479,497,500,571,592,572,521,760,821,782,699,680,697,721))
+
+
+
+```
+
+## 1er Graphique de base
+
+
+```{r graphe1}
+data %>%
+ggplot(aes(x=année, y=annual_deaths_from_fireams)) +
+  geom_area()
+```
+
+## Habillage du 1er graphique
+
+
+```{r graphe1.2}
+data %>%
+ggplot(aes(x=année, y=annual_deaths_from_fireams)) +
+  geom_area(fill='firebrick3')+
+  geom_text(
+    aes(label = annual_deaths_from_fireams),size=3, nudge_y = 150) +
+    scale_x_continuous( name=NULL, labels = scales:::number) +
+    scale_y_continuous(name= NULL, labels = scales:::number) +
+  geom_line()+
+  geom_point()+
+  geom_point(data=. %>% filter(année==2005),color = 'green') +
+  theme_tufte() +
+  labs(
+    title = "Gun deaths in Florida still increasing",
+    subtitle = "Annual deaths resulting from firearms total",
+    caption = "Source: GunPolicy.org"
+  )
+```
+
+##Ajout de texte et commentaire du graphe1
+
+```{r graphe1.3}
+data %>%
+  #déclaration des données utilisées
+  ggplot(aes(x=année, y=annual_deaths_from_fireams)) +
+  #type de graphique et couleur du remplissage
+  geom_area(fill='firebrick2')+
+  #définition des étiquettes
+  geom_text(aes(label = annual_deaths_from_fireams),size=3, nudge_y = 150) +
+  #pour mettre en bleu l'étiquette 1838 associée à la date de la loi
+  geom_text(aes(label= annual_deaths_from_fireams),data=. %>% filter(année==2005),color = 'blue',size=3, nudge_y = 150)+
+  #redéfinition des axes
+  scale_x_continuous( name=NULL, labels = scales:::number) +
+  scale_y_continuous(name= NULL, labels = scales:::number) +
+  #pour relier les points
+  geom_line()+
+  #pour afficher les points 
+  geom_point()+
+  #en bleu la date de mise en place de la loi
+  geom_point(data=. %>% filter(année==2005),color = 'blue') +
+  #y=1350 pour que ça soit bien aligné en taille pdf
+  #cette valeur est à ajuster manuellement en fonction de la taille de l'image finale
+  geom_text(x=2005,y=1350, label="|\n2005\nFlorida enacted\nits 'Stand Your\nGround' law",color="white",size=2,hjust ="left")+
+  #thème qui conserve les axes mais supprime le fond
+  theme_tufte() +
+  #affichage du titre, sous-titre et légende
+  labs(
+    title = "Gun deaths in Florida still increasing",
+    subtitle = "Annual deaths resulting from firearms total",
+    caption = "Source: GunPolicy.org"
+  )
+```
+
+##Version épurée
+```{r graphe1.4}
+data %>%
+  #déclaration des données utilisées
+  ggplot(aes(x=année, y=annual_deaths_from_fireams)) +
+  #type de graphique et couleur du remplissage
+  geom_area(fill='white')+
+  #définition des étiquettes
+  geom_text(aes(label = annual_deaths_from_fireams),size=3, nudge_y = 100) +
+  #pour mettre en bleu l'étiquette 1838 associée à la date de la loi
+  geom_text(aes(label= annual_deaths_from_fireams),data=. %>% filter(année==2005),color = 'blue',size=3, nudge_y = 100)+
+  #redéfinition des axes
+  scale_x_continuous( name=NULL, labels = scales:::number) +
+  scale_y_continuous(name= NULL, labels = scales:::number) +
+  #pour relier les points
+  geom_line(aes(color='red'))+
+  #pour afficher les points 
+  geom_point(aes(color='red'))+
+  #en bleu la date de mise en place de la loi
+  geom_point(data=. %>% filter(année==2005),color = 'blue') +
+  #y=1100 pour que ça soit bien aligné avec le point (attention lors du changement de taille du graphique, ce sera non aligné)
+  geom_text(x=2005,y=1100, label="|\n2005\nFlorida enacted\nits 'Stand Your\nGround' law",color="grey1",size=3,hjust ="left")+
+  #thème qui conserve les axes mais supprime le fond
+  theme_tufte() +
+  #affichage du titre, sous-titre et légende
+  labs(
+    title = "Gun deaths in Florida increased after law",
+    subtitle = "Annual deaths resulting from firearms total",
+    caption = "Source: GunPolicy.org"
+  )+
+  theme(legend.position='none')
+```
+
+##Version avec les données inspirées du graphe original 
+###Graphique finalement choisi
+```{r graphe2}
+#travail sur la base data2
+data2 %>%
+  #déclaration des données pour les axes
+  ggplot(aes(x=année, y=annual_deaths_from_fireams))+
+  #type de graphique et couleur du remplissage
+  geom_area(fill='red4')+
+  #définition des étiquettes, label, taille du texte et décalage par rapport au points
+  geom_text(aes(label = annual_deaths_from_fireams),size=3, nudge_y = 100) +
+  #pour mettre en bleu l'étiquette 521 associée à la date de la loi, de la même taille avec le même décalage pour n'apparaître qu'une seule fois
+  geom_text(aes(label= annual_deaths_from_fireams),data=. %>% filter(année==2005),color = 'blue',size=3, nudge_y = 100)+
+  #redéfinition des axes
+  scale_x_continuous( name=NULL, labels = scales:::number) +
+  scale_y_continuous(name= NULL, labels = scales:::number) +
+  #pour relier les points
+  geom_line()+
+  #pour afficher les points 
+  geom_point()+
+  #en bleu le point de la date de mise en place de la loi
+  geom_point(data=. %>% filter(année==2005),color = 'blue') +
+  #Ajout du texte expliquant la date de mise en place de la loi, affiché à y=410 pour que ça soit bien aligné avec le point (attention lors du changement de taille du graphique, ce sera non aligné, 410 est pour la taille du graphique que nous avons choisi), de couleur blanche pour être visible sur fond rouge, de taille plus grande que l'étiquette des points et texte aligné à gauche
+  geom_text(x=2005,y=410, label="|\n2005\nFlorida enacted\nits 'Stand Your\nGround' law",color="white",size=4,hjust ="left")+
+  #thème qui conserve les axes mais supprime le fond
+  theme_tufte() +
+  #affichage du titre, sous-titre et légende
+  labs(
+    title = "Gun deaths in Florida increased after the Stand Your Ground law",
+    subtitle = "Annual deaths resulting from firearms total",
+  #on change la source, on reprend celle du graphique
+    caption = "Source: Florida Department of Law"
+  )
+
+```
+
+##Autre version, habillage plus sobre
+```{r graphe2.2}
+data2 %>%
+  #déclaration des données utilisées
+  ggplot(aes(x=année, y=annual_deaths_from_fireams)) +
+  #type de graphique et couleur du remplissage
+  geom_area(fill='white')+
+  #définition des étiquettes
+  geom_text(aes(label = annual_deaths_from_fireams),size=3, nudge_y = 100) +
+  #pour mettre en bleu l'étiquette 1838 associée à la date de la loi
+  geom_text(aes(label= annual_deaths_from_fireams),data=. %>% filter(année==2005),color = 'blue',size=3, nudge_y = 100)+
+  #redéfinition des axes
+  scale_x_continuous( name=NULL, labels = scales:::number) +
+  scale_y_continuous(name= NULL, labels = scales:::number) +
+  #pour relier les points
+  geom_line(aes(color='red'))+
+  #pour afficher les points 
+  geom_point(aes(color='red'))+
+  #en bleu la date de mise en place de la loi
+  geom_point(data=. %>% filter(année==2005),color = 'blue') +
+  #y=280 pour que ça soit bien aligné avec le point (attention lors du changement de taille du graphique, ce sera non aligné)
+  geom_text(x=2005,y=280, label="|\n2005\nFlorida enacted\nits 'Stand Your\nGround' law",color="grey1",size=3,hjust ="left")+
+  #thème qui conserve les axes mais supprime le fond
+  theme_tufte() +
+  #affichage du titre, sous-titre et légende
+  labs(
+    title = "Gun deaths in Florida increased after law",
+    subtitle = "Annual deaths resulting from firearms total",
+    caption = "Source: Florida Department of Law"
+  )+
+  #pour enlever la légende associée à la courbe 
+  theme(legend.position='none')
+```
