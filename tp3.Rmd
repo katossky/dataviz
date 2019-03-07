@@ -33,9 +33,10 @@ Nous finirons par des discussions autour d'une poignée de graphiques.
 
 ## Visualisation de données denses
 
-**Idées à faire passer:**
-1. toutes les formes de graphique ne sont pas adpatées à toutes les données
-
+Trois grands principes:
+- ruser
+- g'en'eraliser
+- 
 <!--
 ### 1.1 Principes généraux
 
@@ -353,7 +354,7 @@ NUTS2_year %>%
   filter(année %in% 2005:2015) %>%
   filter(!is.na(population), !is.na(superficie)) %>%
   ggplot(aes(x=as.factor(année), y=round(population,-5))) +
-  geom_beeswarm(size=0.1, priority='density', cex=0.55) +
+  geom_beeswarm(size=0.1, priority='density', cex=0.4) +
   scale_y_continuous(
     labels = scales:::number
   ) +
@@ -379,7 +380,8 @@ NUTS2_year %>%
   filter(!is.na(population), !is.na(superficie)) %>%
   ggplot(aes(x=as.factor(année), y=population)) +
   geom_point(
-    position=position_jitter(width = 0.3, height = 0), alpha=0.3) +
+    position=position_jitter(width = 0.3, height = 0), alpha=0.3
+  ) +
   scale_y_continuous(
     labels = scales:::number
   ) +
@@ -428,6 +430,34 @@ NUTS2_year %>%
     caption  = "Source: Eurostat (niveau NUTS 2)"
   )
 ```
+
+
+Alternativement, avec le beeswarm à l'intérieur:
+
+```{r}
+NUTS2_year %>%
+  filter(!is.na(population), !is.na(superficie)) %>%
+  filter(année %in% 2005:2015) %>%
+  ggplot(aes(x=as.factor(année), y=population)) +
+  geom_violin(aes(fill=as.factor(année))) +
+  scale_y_continuous(
+    labels = scales:::number
+  ) +
+  geom_beeswarm(aes(y=round(population,-5)), size=0.1, priority='density', cex=0.35) +
+  scale_fill_discrete(guide='none', c=50, l=90) +
+  theme_minimal() +
+  theme(
+    panel.grid.major.x = element_blank()
+  ) +
+  labs(
+    x        = NULL,
+    y        = 'Population',
+    title    = "Istanbul (Turquie) surpeuplée, Oulu (Finlande) isolée",
+    subtitle = "Population et superficie en Europe (2015)",
+    caption  = "Source: Eurostat (niveau NUTS 2)"
+  )
+```
+  
 
 
 ```{r}
@@ -496,17 +526,350 @@ NUTS2_year %>%
 
 ### 1.4. 2 variables discrètes
 
-=> représenter des comptes
+```{r}
+NUTS2_year %>%
+  filter(!is.na(population)) %>%
+  mutate(
+    population = (population/1000000) %>% round(1) %>% cut(., breaks=quantile(.), include.lowest =TRUE),
+    pays       = str_sub(id_anc, end=2)
+  ) %>%
+  ggplot(aes(y=population, x=pays)) +
+  geom_point() +
+  labs(
+    x        = "Population",
+    y        = NULL,
+    title    = "Istanbul (Turquie) surpeuplée, Oulu (Finlande) isolée",
+    subtitle = "Population et superficie en Europe (2015)",
+    caption  = "Source: Eurostat (niveau NUTS 2)"
+  ) +
+  theme_minimal() +
+  coord_equal()
+```
+
+1.3.0 Représenter des comptes
+
+```{r}
+NUTS2_year %>%
+  filter(!is.na(population), année==2015) %>%
+  mutate(
+    population = (population/1000000) %>% round(1) %>% cut(., breaks=quantile(.), include.lowest = TRUE),
+    pays       = str_sub(id_anc, end=2)
+  ) %>%
+  group_by(pays, population) %>% summarize(n=n()) %>%
+  ggplot(aes(y=population, x=pays)) +
+  geom_point(aes(size=n)) +
+  geom_text(aes(label=n), col='white', size=1.5) +
+  scale_size_area(breaks=c(1, 4, 16), guide='none') +
+  labs(
+    x        = NULL,
+    y        = NULL,
+    title    = "Istanbul (Turquie) surpeuplée, Oulu (Finlande) isolée",
+    subtitle = "Population et superficie en Europe (2015)",
+    caption  = "Source: Eurostat (niveau NUTS 2)"
+  ) +
+  theme_minimal() +
+  coord_equal()
+```
+
+1.3.1 Jittering
+
+```{r}
+NUTS2_year %>%
+  filter(!is.na(population)) %>%
+  mutate(
+    population = (population/1000000) %>% round(1) %>% cut(., breaks=quantile(.), include.lowest =TRUE),
+    pays       = str_sub(id_anc, end=2)
+  ) %>%
+  ggplot(aes(y=population, x=pays)) +
+  geom_point(position=position_jitter(), alpha=0.5, shape=21) + # ou geom_jitter
+  labs(
+    x        = "Population",
+    y        = NULL,
+    title    = "Istanbul (Turquie) surpeuplée, Oulu (Finlande) isolée",
+    subtitle = "Population et superficie en Europe (2015)",
+    caption  = "Source: Eurostat (niveau NUTS 2)"
+  ) +
+  theme_minimal() +
+  coord_equal()
+```
 
 1.3.1 Heatmap
-1.3.2 Marimekko plot
-1.3.3 Disques alignés sur une grille
-1.3.4 small multiples
 
-## Scénarisation d'un graphique
+```{r}
+NUTS2_year %>%
+  filter(!is.na(population), année==2015) %>%
+  mutate(
+    population = (population/1000000) %>% round(1) %>% cut(., breaks=quantile(.), include.lowest =TRUE),
+    pays       = str_sub(id_anc, end=2)
+  ) %>%
+  group_by(pays, population) %>% summarize(n=n()) %>%
+  complete(pays, population, fill=list(n=0)) %>%
+  ggplot(aes(y=population, x=pays)) +
+  geom_tile(aes(fill=n)) +
+  scale_fill_continuous(low='grey95')+
+  labs(
+    fill     = NULL,
+    x        = NULL,
+    y        = NULL,
+    title    = "Istanbul (Turquie) surpeuplée, Oulu (Finlande) isolée",
+    subtitle = "Population et superficie en Europe (2015)",
+    caption  = "Source: Eurostat (niveau NUTS 2)"
+  ) +
+  theme_minimal() +
+  coord_equal()
+```
 
-La scénarisation d'un graphique (en anglais: _story-telling_) est le fait de guider la lecture d'un graphique. Il ne faut pas y voir de la manipulation! Au contraire, il s'agit de faciliter l'apropriation du graphique. Plus le graphique est complexe / original, plus l'aide doit être poussée.
+1.3.2 Barres empilées, barres empilées standardisées, Marimekko plot
 
-## Critique de graphiques
+Pas d'échelle logarithmique avec les barres!!!!!!!!
+
+```{r}
+NUTS2_year %>%
+  filter(!is.na(population), année==2015) %>%
+  mutate(
+    population = (population/1000000) %>% round(1) %>% cut(., breaks=quantile(.), include.lowest =TRUE),
+    pays       = str_sub(id_anc, end=2)
+  ) %>%
+  arrange() %>%
+  ggplot(aes(x=pays, group=population, fill=population)) +
+  geom_bar(stat='count', position='stack') +
+  scale_fill_hue(h=c(60,-40), l=c(80,75,70,65), c=50)+
+  scale_y_continuous(limits = c(0,NA))+
+  labs(
+    fill     = NULL,
+    x        = NULL,
+    y        = NULL,
+    title    = "Istanbul (Turquie) surpeuplée, Oulu (Finlande) isolée",
+    subtitle = "Population et superficie en Europe (2015)",
+    caption  = "Source: Eurostat (niveau NUTS 2)"
+  ) +
+  theme_minimal()+
+  theme(
+    panel.grid.major.x = element_blank()
+  )
+```
 
 
+```{r}
+NUTS2_year %>%
+  filter(!is.na(population), année==2015) %>%
+  mutate(
+    population = (population/1000000) %>% round(1) %>% cut(., breaks=quantile(.), include.lowest =TRUE),
+    pays       = str_sub(id_anc, end=2)
+  ) %>%
+  group_by(population, pays) %>% summarise(n=n()) %>% ungroup %>%
+  mutate(pays = pays %>% fct_reorder(n, sum) %>% fct_rev) %>%
+  ggplot(aes(x=pays, group=population, fill=population)) +
+  geom_bar(aes(y=n), stat='identity', position='stack') + # position = position_stack(reverse = TRUE)
+  scale_y_continuous(expand = c(0, 0))+
+  scale_fill_hue(h=c(60,-40), l=c(80,75,70,65), c=50)+
+  labs(
+    fill     = NULL,
+    x        = NULL,
+    y        = NULL,
+    title    = "Istanbul (Turquie) surpeuplée, Oulu (Finlande) isolée",
+    subtitle = "Population et superficie en Europe (2015)",
+    caption  = "Source: Eurostat (niveau NUTS 2)"
+  ) +
+  theme_minimal()+
+  theme(
+    panel.grid.major.x = element_blank()
+  )
+```
+
+On peut normaliser:
+```{r}
+NUTS2_year %>%
+  filter(!is.na(population), année==2015) %>%
+  mutate(
+    population = (population/1000000) %>% round(1) %>% cut(., breaks=quantile(.), include.lowest =TRUE),
+    pays       = str_sub(id_anc, end=2)
+  ) %>%
+  group_by(population, pays) %>% summarise(n=n()) %>% ungroup %>%
+  group_by(pays) %>% mutate(n_pays=sum(n)) %>% ungroup %>%
+  filter(n_pays > 5) %>%
+  mutate(pays = pays %>% fct_reorder2(population, n/n_pays) %>% fct_rev) %>%
+  ggplot(aes(x=pays, group=population, fill=population)) +
+  geom_bar(aes(y=n), stat='identity', position=position_fill(reverse = TRUE)) + # position = position_stack(reverse = TRUE)
+  scale_y_continuous(expand = c(0, 0))+
+  scale_fill_hue(h=c(60,-40), l=c(80,75,70,65), c=50)+
+  labs(
+    fill     = NULL,
+    x        = NULL,
+    y        = NULL,
+    title    = "Istanbul (Turquie) surpeuplée, Oulu (Finlande) isolée",
+    subtitle = "Population et superficie en Europe (2015)",
+    caption  = "Source: Eurostat (niveau NUTS 2)"
+  ) +
+  theme_minimal()+
+  theme(
+    panel.grid.major.x = element_blank()
+  )
+```
+
+Pour avoir une idée de la proportion relative entre les pays, on peut avoir envie de modifier le graphique précédent.
+
+```{r}
+library(ggmosaic)
+NUTS2_year %>%
+  filter(!is.na(population), année==2015) %>%
+  mutate(
+    population = (population/1000000) %>% round(1) %>% cut(., breaks=quantile(.), include.lowest =TRUE),
+    pays       = str_sub(id_anc, end=2)
+  ) %>%
+  group_by(pays, population) %>% mutate(n=n()) %>% ungroup %>%
+  group_by(pays) %>% mutate(n_pays=n()) %>% ungroup %>% filter(n_pays > 5) %>%
+  mutate(pays = pays %>% fct_reorder2(population, n/n_pays) %>% fct_rev) %>%
+  ggplot()+
+  geom_mosaic(aes(x=product(population, pays), fill=population))+
+  scale_fill_hue(h=c(60,-40), l=c(80,75,70,65), c=50)+
+  scale_y_continuous(expand = c(0, 0), breaks=NULL)+
+  scale_x_productlist(expand = c(0, 0))+
+  labs(
+    fill     = NULL,
+    x        = NULL,
+    y        = NULL,
+    title    = "Istanbul (Turquie) surpeuplée, Oulu (Finlande) isolée",
+    subtitle = "Population et superficie en Europe (2015)",
+    caption  = "Source: Eurostat (niveau NUTS 2)"
+  ) +
+  theme_minimal()+
+  theme(
+    panel.grid.major = element_blank()
+  )
+```
+
+
+## Scénarisation d'un graphique (11h00-12h00)
+
+La scénarisation d'un graphique (en anglais: _story-telling_) est le fait de guider la lecture d'un graphique. Il ne faut pas y voir de la manipulation! Au contraire, il s'agit de faciliter l'apropriation du graphique. Plus le graphique est complexe / original, plus l'aide doit être poussée. Voyons comment nous y prendre avec un exemple précis.
+
+La scénarisation est l'aboutissement de toute la recherche graphique. Une fois qu'on exploré de nombreuses possibilités et qu'on a choisi une représentation pertinente, reste à accompagner le spectateur dans la lecture du graphique, pour susciter de l'intérêt et lui permettre d'exercer son jugement critique.
+
+Essayons avec les données du chômage.
+
+```{r, echo=TRUE}
+load("chomage.RData")
+```
+
+### 1. Représentez le chômage au cours du temps
+
+```{r, eval=FALSE}
+chomage %>%
+  ggplot(aes(........................................................)) +
+  .......................................................................
+  .......................................................................
+  .......................................................................
+  .......................................................................
+  .......................................................................
+  .......................................................................
+  .......................................................................
+  .......................................................................
+  .......................................................................
+  .......................................................................
+  theme_minimal() +
+  labs(
+  .......................................................................
+  .......................................................................
+  .......................................................................
+  .......................................................................
+  .......................................................................
+  .......................................................................
+  )
+```
+
+```{r, echo=FALSE}
+chomage %>%
+  ggplot(aes(x=Année, y=Chômage)) +
+  geom_path(aes(group=1)) +
+  geom_point() +
+  scale_y_continuous(labels = scales::percent_format(accuracy=1)) +
+  theme_minimal() +
+  labs(
+    x = NULL, y=NULL,
+    title = "Le calme avant la tempête: 2008, plus faible taux de chômage de la décennie",
+    subtitle = "Chômage en France de 1995 à 2017 (% de la population active)"
+  )
+```
+
+
+
+### 2. Qu'est-ce que le chômage au sens du Bureau internationnal du travail (BIT)? Envisagez des situations extrêmement distinctes, mais étant carractérisées par un même taux de chômage fictif de 0%.
+
+<!--
+
+(INSEE: https://www.insee.fr/fr/metadonnees/definition/c1129)
+
+"En application de la définition internationale adoptée en 1982 par le Bureau international du travail (BIT), un chômeur est une personne en âge de travailler (15 ans ou plus) qui répond simultanément à trois conditions :
+- être sans emploi, c'est à dire ne pas avoir travaillé au moins une heure durant une semaine de référence ;
+- être disponible pour prendre un emploi dans les 15 jours ;
+- avoir cherché activement un emploi dans le mois précédent ou en avoir trouvé un qui commence dans moins de trois mois.
+
+Remarque:
+Un chômeur au sens du BIT n'est pas forcément inscrit à Pôle Emploi (et inversement)."
+
+Cette définition est empreinte de nombreuses difficultés techniques. Par exemple pour la définition de "chercher activement" (poster des CV? en parler autour de soi? avec quelle intensité) ou de "être disponible pour un emploi" (à l'autre bout du monde? pour n'importe quel salaire?). Le taux de chômage peut augmenter moins fortement que prévu parce que les étudiants prolongent leurs études, parce que les personnes acceptent des boulots alimentaires ou à temps partiel, parce que les chômeurs se découragent et cessent de chercher un emploi...
+
+Quelques exemples, imaginons 100 personnes en âge de travailler:
+1. toutes travaillent à temps partiel (voulu ou subis, peu importe)
+2. 50 travaillent et 50 ne cherchent pas d'emploi (personne au foyer, étudiant, etc.)
+3. toutes travaillent à temps plein
+-->
+
+### 3. Notre base de donnée contient deux autres variables. Offrent-elles un regard complémentaire sur la nature de l'activité en France dans la précédente décennie?
+
+### 4. Proposez un ou plusieurs graphiques synthétisant ces différents aspects
+
+### 5. Voici une proposition (le graphique est disponible au format .png). Quels sont les avantages d'une telle visualisation? Habillez ce graphique à l'aide de _Libre Office Draw_.
+
+_En plus des habituels titre, source, etc., votre habillage comprendra notamment une scénarisation à l'aide de petites notes de lecture numérotées, pour aide le lecteur à s'approprier ce graphique complexe. (En principe, vous pouriez également placer à la main les étiquettes des années de façon plus harmonieuse que ne le fait `ggplot2` automatiquement.)_
+
+```{r}
+library(ggrepel)
+library(gridExtra)
+library(cowplot)
+
+plot1 <- chomage %>%
+  ggplot(aes(x=Année, y=Chômage)) +
+  geom_path(aes(group=1, col=Chômage)) +
+  geom_point(aes(col=Chômage)) +
+  scale_x_continuous(minor_breaks = 0:3000)+
+  scale_y_continuous("", label=scales:::percent_format(accuracy =1), minor_breaks=seq(0,1,0.002)) +
+  scale_colour_continuous(type='viridis', breaks=seq(0,1,0.01), label=scales:::percent_format(accuracy =1), guide='none')+
+  theme_minimal() +
+  coord_fixed(ratio=485) +
+  labs(x=NULL, y=NULL)
+
+plot2 <- chomage %>% ggplot(aes(x=`Temps partiel`, y=Inactivité)) +
+  geom_point(aes(col=Chômage)) +
+  geom_path(aes(group=1, col=Chômage)) +
+  geom_text_repel(aes(label=Année), force=2, size=3) +
+  scale_x_continuous(breaks=seq(0,1,0.01), minor_breaks=seq(0,1,0.002), label=scales:::percent_format(accuracy =1))+
+  scale_y_continuous(breaks=seq(0,1,0.01), minor_breaks=seq(0,1,0.002), label=scales:::percent_format(accuracy =1)) +
+  scale_color_viridis_c(breaks=seq(0,1,0.01), label=scales:::percent_format(accuracy = 1))+
+  theme_minimal() +
+  coord_equal() +
+  labs(x=NULL, y=NULL, color=NULL)
+
+plot_grid(plot1, plot2)
+```
+
+<!-- rappel: formats images compressés JPG adapté au photos, PNG au graphiques ; quand on utilise JPG pour des graphiques, présence de dégradés dans les blancs ; JPG n'autorise pas la transparence -->ß
+
+## Critique de graphiques (12h15-12h45)
+
+### Graphique 1
+
+ß
+
+### Graphique 2
+
+### Graphique 3
+
+
+
+
+
+- Histogramme bizarre des données fiscales
+- 
+- 
