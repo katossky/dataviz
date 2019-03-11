@@ -28,13 +28,17 @@ income <- read_excel("data/indicator gapminder gdp_per_capita_ppp.xlsx", sheet="
   mutate(year = as.integer(year))
 
 # Free data from Gapminder.org
-countries <- read_excel("data/Data Geographies - v1 - by Gapminder.xlsx", sheet="list-of-countries-etc")
+countries <- read_excel("data/Data Geographies - v1 - by Gapminder.xlsx", sheet="list-of-countries-etc") %>%
+  rename(country=name)
 
-gapminder <- list(emissions, population, life_expectancy, income) %>% Reduce(function(a,b) full_join(a, b, by=c("country", "year")), x=.) %>%
-  semi_join(countries, by=c("country"="name"))
+gapminder <- list(emissions, population, life_expectancy, income) %>%
+  Reduce(function(a,b) full_join(a, b, by=c("country", "year")), x=.) %>%
+  semi_join(countries, by="country")
 
 gapminder %>%
   group_by(country) %>%
   summarise_all(function(var) list(var)) %>%
-  jsonlite::toJSON(na = "null") %>%
+  full_join(countries, by="country") %>%
+  select(country:four_regions, -geo, -year) %>%
+  jsonlite::toJSON() %>%
   write(file='data/gap-minder.json')
