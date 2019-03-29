@@ -40,5 +40,5 @@ gapminder %>%
   summarise_all(function(var) list(var)) %>%
   full_join(countries, by="country") %>%
   select(country:four_regions, -geo, -year) %>%
-  jsonlite::toJSON() %>%
+  jsonlite::toJSON(na = "null") %>%
   write(file='data/gap-minder.json')
